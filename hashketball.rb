@@ -102,35 +102,25 @@ def game_hash
         slam_dunks: 12}]}}
 end
 
+def consolidated_players
+  consolidated_players = []
+  game_hash.each_value do |team_data| 
+    consolidated_players << team_data[:players]
+  end
+  return consolidated_players.flatten
+end
+
 def player_stats(player_name)
-  # game_hash[:home][:players].each { |player| return player.except(name) if player[:player_name] === player_name } #hash.except only works with Rails
+  player_stats = consolidated_players.reduce(nil) {|memo, player| player[:player_name] === player_name ? player : memo }
   
-  # game_hash[:home][:players].each do |player| 
-  #   if player[:player_name] === player_name
-  #     player.shift
-  #     return player
-  #   end
-  # end
-  
-  # game_hash[:away][:players].each do |player|
-  #   if player[:player_name] === player_name
-  #     player.shift
-  #     return player
-  #   end
-  # end
-  
-  game_hash.each_value do |team_data|
-    players = team_data[:players]
-    players.each do |player|
-      if player[:player_name] === player_name
-        player.shift
-        return player
-      end
-    end
+  if player_stats
+    player_stats.shift
+    return player_stats
   end
   
   nil
 end
+
 
 def num_points_scored(player_name)
   player_stats(player_name)[:points]
@@ -162,16 +152,47 @@ def player_numbers(team_name)
   end
 end
 
-def big_shoe_rebounds
-  all_player_stats = []
-  
-  game_hash.each_value do |team_data|
-    all_player_stats << team_data[:players]
+def consolidated_players
+  consolidated_players = []
+  game_hash.each_value do |team_data| 
+    consolidated_players << team_data[:players]
   end
-  
-  largest_shoe_size = all_player_stats.flatten.reduce(0) { |memo, player| memo > player[:shoe] ? memo : player[:shoe] }
-  
-  player_with_largest_shoe = all_player_stats.flatten.find { |player| player[:shoe] === 19 }
+  return consolidated_players.flatten
+end
+
+def big_shoe_rebounds
+  player_with_largest_shoe = consolidated_players.reduce(consolidated_players[0]) { |memo, player| memo[:shoe] > player[:shoe] ? memo : player}
   
   return player_with_largest_shoe[:rebounds]
+end
+
+def most_points_scored
+  highest_scoring_player = consolidated_players.reduce(consolidated_players[0]) { |memo, player| player[:points] > memo[:points] ? player: memo }
+  
+  return highest_scoring_player[:player_name]
+end
+
+def winning_team
+  home_team_points = game_hash[:home][:players].reduce(0) { |memo, player| memo + player[:points]}
+  
+  away_team_points = game_hash[:away][:players].reduce(0) { |memo, player| memo + player[:points]}
+  
+  return home_team_points > away_team_points ? game_hash[:home][:team_name] : game_hash[:away][:team_name]
+end
+
+def player_with_longest_name
+  player_names = consolidated_players.reduce([]) { |memo, player| memo << player[:player_name] }
+  
+  return player_names.max_by { |name| name.length }
+  # return player_name.reduce("") { |memo, name| memo.length > name.length ? memo : name }
+end
+
+def player_with_most_steals
+  player_with_most_steals = consolidated_players.reduce(consolidated_players[0]) { |memo, player| player[:steals] > memo[:steals] ? player : memo}
+  
+  return player_with_most_steals[:player_name]
+end
+
+def long_name_steals_a_ton? 
+  player_with_most_steals === player_with_longest_name
 end
