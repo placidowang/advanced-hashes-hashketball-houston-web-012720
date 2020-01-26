@@ -103,10 +103,8 @@ def game_hash
 end
 
 def consolidated_players
-  consolidated_players = []
-  game_hash.each_value do |team_data| 
-    consolidated_players << team_data[:players]
-  end
+  consolidated_players = game_hash.reduce([]) { |memo, (team, team_data)| memo << team_data[:players] }
+  
   return consolidated_players.flatten
 end
 
@@ -131,9 +129,7 @@ def shoe_size(player_name)
 end
 
 def team_colors(team_name)
-  game_hash.each_value do |team_data|
-    return team_data[:colors] if team_data[:team_name] === team_name
-  end
+  game_hash.reduce([]) { |memo, (team, team_data)| team_data[:team_name] === team_name ? team_data[:colors] : memo}
 end
 
 def team_names
@@ -153,10 +149,8 @@ def player_numbers(team_name)
 end
 
 def consolidated_players
-  consolidated_players = []
-  game_hash.each_value do |team_data| 
-    consolidated_players << team_data[:players]
-  end
+  consolidated_players = game_hash.reduce([]) { |memo, (team, team_data)| memo << team_data[:players]}
+  
   return consolidated_players.flatten
 end
 
