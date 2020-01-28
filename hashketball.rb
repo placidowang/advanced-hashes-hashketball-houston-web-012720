@@ -1,3 +1,4 @@
+require 'pry'
 require 'pp'
 
 def game_hash
@@ -103,13 +104,16 @@ def game_hash
 end
 
 def consolidated_players
-  consolidated_players = game_hash.reduce([]) { |memo, (team, team_data)| memo << team_data[:players] }
-  
-  return consolidated_players.flatten
+  # consolidated_players = game_hash.reduce([]) { |memo, (team, team_data)| memo << team_data[:players] }
+  return consolidated_players = game_hash.values.reduce([]) { |memo, team_data| memo << team_data[:players] }.flatten
 end
 
+
 def player_stats(player_name)
-  player_stats = consolidated_players.reduce(nil) {|memo, player| player[:player_name] === player_name ? player : memo }
+  # player_stats = consolidated_players.reduce(nil) {|memo, player| player[:player_name] === player_name ? player : memo }
+  
+  player_stats = consolidated_players.find {|player| player[:player_name] === player_name }
+  
   
   if player_stats
     player_stats.shift
@@ -118,6 +122,7 @@ def player_stats(player_name)
   
   nil
 end
+
 
 
 def num_points_scored(player_name)
