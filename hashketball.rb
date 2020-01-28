@@ -1,3 +1,4 @@
+require 'pry'
 require 'pp'
 
 def game_hash
